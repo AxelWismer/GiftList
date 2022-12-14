@@ -1,17 +1,35 @@
 const axios = require('axios');
-const niceList = require('../utils/niceList.json');
-const MerkleTree = require('../utils/MerkleTree');
+const prompt = require('prompt-sync')();
+const { MerkleTree } = require('cryptography');
+const niceList = require('./../utils/niceList.json');
 
 const serverUrl = 'http://localhost:1225';
 
 async function main() {
-  // TODO: how do we prove to the server we're on the nice list? 
-
+  let merkleTree = new MerkleTree(niceList);
+  const name = prompt('What is your name? (blank for "Axel") ') || 'Axel';
+  let index = niceList.findIndex(n => n === name);
+  let proof = merkleTree.getProof(index);
+  const root = merkleTree.getRoot();
+  
+  if (index === -1) {
+    console.log('\nYour name is not on the list!');
+    console.log('Atempting to create a fake proof >:) ...\n');
+    // Replacing one element of the list with the incorrect name
+    index = 0;
+    niceList[0] = name;
+    merkleTree = new MerkleTree(niceList);
+    proof = merkleTree.getProof(index);
+    console.log("Because a leave has changed the root of the tree changed");
+    console.log("Original root: ", root);
+    console.log("New root:      ", merkleTree.getRoot());
+  }
   const { data: gift } = await axios.post(`${serverUrl}/gift`, {
-    // TODO: add request body parameters here!
+    proof,
+    name
   });
 
-  console.log({ gift });
+  console.log("\nResponse:",gift);
 }
 
 main();
