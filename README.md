@@ -1,22 +1,56 @@
 # Gift List
+This exercise demonstrates how you can use the Merkle tree to check if a data item is in a set without having to store the set.
 
+In order to do this, the root of the Merkle tree is calculated and stored on the server. The client generates a proof that an element is in the set and sends it along with the element to be verified. The server calculates the root using the given proof and checks if it's equal to the stored root.
+
+## Results
+For this project, a typescript cryptography module was created with the following functions:
+```typescript
+function hashMessage(message: string) : Uint8Array
+
+async function signMessage(message: string, privateKey: Uint8Array) : Promise<[string, number]>
+
+function getAddress(publicKey: Uint8Array): string
+
+function recoverKey(message: string, signature: string, recoveryBit: number): Uint8Array
+
+function authenticate(message: string, signature: string, recoveryBit: number): [boolean, string]
+
+// Added
+type Proof = { data: string; left: boolean };
+
+type HexProof = { data: Uint8Array; left: boolean };
+
+class MerkleTree {
+  leaves: Uint8Array[];
+  
+  getRoot() : string
+
+  getProof(index: number, layer : Uint8Array[] = this.leaves, proof: Proof[] = []): Proof[]
+}
+
+function verifyProof(proof: Proof[], leaf: string, root: string) : boolean
+```
+
+The objective of the module is to provide the UI and the server with the same cryptographic functions so that they can communicate securely.
+## Get Started
 To get started with the repository, clone it and then run `npm install` in the top-level directory to install the depedencies.
 
 There are three folders in this repository:
 
-## Client
+### Client
 
 You can run the client from the top-level directory with `node client/index`. This file is a script which will send an HTTP request to the server.
 
 Think of the client as the _prover_ here. It needs to prove to the server that some `name` is in the `MERKLE_ROOT` on the server. 
 
-## Server
+### Server
 
 You can run the server from the top-level directory with `node server/index`. This file is an express server which will be hosted on port 1225 and respond to the client's request.
 
 Think of the server as the _verifier_ here. It needs to verify that the `name` passed by the client is in the `MERKLE_ROOT`. If it is, then we can send the gift! 
 
-## Utils
+### Utils
 
 There are a few files in utils:
 

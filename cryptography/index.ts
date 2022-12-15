@@ -61,11 +61,11 @@ export class MerkleTree {
     this.leaves = leaves.map(Buffer.from).map(keccak256);
   }
 
-  getRoot() {
+  getRoot() : string {
     return bytesToHex(this._getRoot(this.leaves));
   }
 
-  getProof(index: number, layer = this.leaves, proof: Proof[] = []): Proof[] {
+  getProof(index: number, layer : Uint8Array[] = this.leaves, proof: Proof[] = []): Proof[] {
     if (layer.length === 1) {
       return proof;
     }
@@ -119,7 +119,7 @@ export class MerkleTree {
 
 type HexProof = { data: Uint8Array; left: boolean };
 
-export function verifyProof(proof: Proof[], leaf: string, root: string) {
+export function verifyProof(proof: Proof[], leaf: string, root: string) : boolean {
   const hexProof: HexProof[] = proof.map(({ data, left }) => ({
     left,
     data: hexToBytes(data),
